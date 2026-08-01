@@ -1,0 +1,77 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+import { withBase } from "../../utils/paths";
+
+export async function getStaticPaths() {
+  const chapters = await getCollection("chapters");
+  return chapters
+    .filter((entry) => entry.data.published)
+    .map((entry) => ({
+      params: { slug: entry.slug },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const publishedChapters = (await getCollection("chapters"))
+  .filter((chapter) => chapter.data.published)
+  .sort((a, b) => a.data.chapter - b.data.chapter);
+
+const currentIndex = publishedChapters.findIndex(
+  (chapter) => chapter.slug === entry.slug,
+);
+const previousChapter =
+  currentIndex > 0 ? publishedChapters[currentIndex - 1] : null;
+const nextChapter =
+  currentIndex < publishedChapters.length - 1
+    ? publishedChapters[currentIndex + 1]
+    : null;
+---
+
+<Layout
+  title={entry.data.title}
+  description={entry.data.summary ?? entry.data.title}
+  currentSlug={entry.slug}
+>
+  <header class="chapter-header">
+    <span class="chapter-number">Chapter {entry.data.chapter}</span>
+    <h1>{entry.data.title}</h1>
+    {entry.data.summary && <p class="summary">{entry.data.summary}</p>}
+  </header>
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    {
+      previousChapter ? (
+        <a
+          class="chapter-nav-btn chapter-nav-btn-secondary"
+          href={withBase(`chapters/${previousChapter.slug}/`)}
+        >
+          ← Previous chapter
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      nextChapter ? (
+        <a
+          class="chapter-nav-btn chapter-nav-btn-primary"
+          href={withBase(`chapters/${nextChapter.slug}/`)}
+        >
+          Next chapter →
+        </a>
+      ) : (
+        <a class="chapter-nav-btn chapter-nav-btn-secondary" href={withBase("")}>
+          All chapters
+        </a>
+      )
+    }
+  </nav>
+</Layout>

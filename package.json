@@ -1,0 +1,14 @@
+{
+  "name": "book-site",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "ingest": "node scripts/ingest.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.7.10"
+  }
+}

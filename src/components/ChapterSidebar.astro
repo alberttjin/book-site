@@ -1,0 +1,37 @@
+---
+import { getCollection } from "astro:content";
+import { withBase } from "../utils/paths";
+
+interface Props {
+  currentSlug?: string;
+}
+
+const { currentSlug } = Astro.props;
+
+const chapters = (await getCollection("chapters"))
+  .filter((entry) => entry.data.published)
+  .sort((a, b) => b.data.chapter - a.data.chapter);
+---
+
+<aside class="chapter-sidebar" aria-label="Chapters">
+  <p class="sidebar-heading">Chapters</p>
+  {
+    chapters.length === 0 ? (
+      <p class="sidebar-empty">No chapters yet.</p>
+    ) : (
+      <ol class="sidebar-list">
+        {chapters.map((chapter) => (
+          <li>
+            <a
+              href={withBase(`chapters/${chapter.slug}/`)}
+              class:list={[{ active: chapter.slug === currentSlug }]}
+            >
+              <span class="sidebar-chapter-num">{chapter.data.chapter}</span>
+              <span class="sidebar-chapter-title">{chapter.data.title}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    )
+  }
+</aside>
